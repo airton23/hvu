@@ -1729,7 +1729,7 @@ public class Facade {
     private final FichaServiceInterface fichaServiceInterface;
 
     @Transactional
-    public Ficha saveFicha(Ficha newInstance) {
+    public Ficha saveFicha(Ficha newInstance, String sessionId) {
         if (newInstance.getAgendamento() == null || newInstance.getAgendamento().getId() <= 0) {
             throw new IllegalArgumentException("Ficha deve estar vinculada a um agendamento válido.");
         }
@@ -1738,13 +1738,8 @@ public class Facade {
             throw new ResourceNotFoundException("Agendamento", "id", newInstance.getAgendamento().getId());
         }
 
-        if (newInstance.getMedico() == null || newInstance.getMedico().getId() <= 0) {
-            throw new IllegalArgumentException("Ficha deve estar vinculada a um médico válido.");
-        }
-
-        if (!medicoServiceInterface.existsById(newInstance.getMedico().getId())) {
-            throw new ResourceNotFoundException("Médico", "id", newInstance.getMedico().getId());
-        }
+        Medico medico = medicoServiceInterface.findByUserId(sessionId);
+        newInstance.setMedico(medico);
 
         return fichaServiceInterface.saveFicha(newInstance);
     }
@@ -1759,18 +1754,9 @@ public class Facade {
             throw new IllegalArgumentException("Ficha deve estar vinculada a um agendamento.");
         }
 
-        if (obj.getMedico() == null) {
-            throw new IllegalArgumentException("Ficha deve estar vinculada a um médico.");
-        }
-
         Long agendamentoId = obj.getAgendamento().getId();
         if (!agendamentoRepository.existsById(agendamentoId)) {
             throw new ResourceNotFoundException("Agendamento", "id", agendamentoId);
-        }
-
-        Long medicoId = obj.getMedico().getId();
-        if (!medicoServiceInterface.existsById(medicoId)) {
-            throw new ResourceNotFoundException("Medico", "id", medicoId);
         }
 
         Ficha existingFicha = findFichaById(id);

@@ -3,6 +3,9 @@ package br.edu.ufape.hvu.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import br.edu.ufape.hvu.facade.Facade;
@@ -27,7 +30,10 @@ public class FichaController {
     @PreAuthorize("hasRole('MEDICO')")
     @PostMapping("/ficha")
     public FichaResponse createFicha(@Valid @RequestBody FichaRequest newObj) {
-        return new FichaResponse(facade.saveFicha(newObj.convertToEntity()));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Jwt principal = (Jwt) authentication.getPrincipal();
+
+        return new FichaResponse(facade.saveFicha(newObj.convertToEntity(), principal.getSubject()));
     }
 
     @PreAuthorize("hasAnyRole('MEDICO', 'PATOLOGISTA')")
