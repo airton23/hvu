@@ -614,6 +614,8 @@ function CreateConsulta() {
     setSelectedFichaId((prev) => (prev === fichaId ? null : fichaId));
   };
 
+  const resolvedAnimalId = animalId || vagaData?.agendamento?.animal?.id;
+
   return (
     <>
       <VoltarButton />
@@ -634,9 +636,21 @@ function CreateConsulta() {
           >
             {showHistorico ? "Ocultar Histórico Clínico" : "Visualizar Histórico Clínico"}
           </button>
+          <div className={styles.historicoSection}>
           {showHistorico && (
-            <HistoricoFichasAnimal />
+            resolvedAnimalId ? (
+              
+                <HistoricoFichasAnimal
+                  key={resolvedAnimalId}
+                  animalId={resolvedAnimalId}
+                  embedded
+                  skipPermissionCheck
+                />
+            ) : (
+              <div className={styles.message}>Carregando histórico clínico...</div>
+            )
           )}
+           </div>  
         </div>
 
 
